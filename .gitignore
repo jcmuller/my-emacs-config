@@ -1,11 +1,11 @@
-# Compiled
-*.elc
-
-# Packaging
-.cask
-
-# Backup files
 *~
-
-# Undo-tree save-files
+\#*\#
+ac-comphist.dat
+.cask
+*.elc
+elpa
+eshell
+history
+projectile-bookmarks.eld
+recentf
 *.~undo-tree
