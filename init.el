@@ -24,6 +24,7 @@
    (quote
     ("06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" default)))
  '(default-frame-alist (quote ((font . "Ubuntu-Mono-12") (vertical-scroll-bars))))
+ '(electric-pair-mode t)
  '(enh-ruby-bounce-deep-indent nil)
  '(enh-ruby-deep-indent-construct nil)
  '(enh-ruby-deep-indent-paren nil)
@@ -52,8 +53,9 @@
  '(magit-git-executable "/usr/bin/git")
  '(package-selected-packages
    (quote
-    (dockerfile-mode markdown-mode+ gh-md markdown-mode helm-flx helm-flycheck helm-fuzzier helm-fuzzy-find enh-ruby-mode color-theme-sanityinc-tomorrow flycheck ruby-end ruby-extra-highlight ruby-refactor ruby-test-mode ruby-tools helm-ls-git helm-cmd-t helm-bundle-show bundler ace-window browse-at-remote neotree evil-magit evil yaml-mode evil-tabs projectile-ripgrep ripgrep editorconfig editorconfig-custom-majormode helm-projectile ## magit thrift sentence-navigation org-evil goto-last-change go-mode go-autocomplete git-gutter+ exec-path-from-shell evil-textobj-column evil-textobj-anyblock evil-surround evil-rails evil-numbers evil-matchit)))
+    (yasnippet-snippets yasnippet origami vdiff dockerfile-mode markdown-mode+ gh-md markdown-mode helm-flx helm-flycheck helm-fuzzier helm-fuzzy-find enh-ruby-mode color-theme-sanityinc-tomorrow flycheck ruby-end ruby-extra-highlight ruby-refactor ruby-test-mode ruby-tools helm-ls-git helm-cmd-t helm-bundle-show bundler ace-window browse-at-remote neotree evil-magit evil yaml-mode evil-tabs projectile-ripgrep ripgrep editorconfig editorconfig-custom-majormode helm-projectile ## magit thrift sentence-navigation org-evil goto-last-change go-mode go-autocomplete git-gutter+ exec-path-from-shell evil-textobj-column evil-textobj-anyblock evil-surround evil-rails evil-numbers evil-matchit)))
  '(rubocop-check-command "rubocop --format emacs")
+ '(ruby-deep-arglist nil)
  '(ruby-end-insert-newline nil)
  '(ruby-refactor-add-parens t)
  '(save-place t)
@@ -157,6 +159,9 @@
 
 (defun my-modes-hook ()
   "My global hook."
+  (require 'origami)
+  (require 'yasnippet)
+
   (column-number-mode t)
   (dynamic-completion-mode t)
   (evil-mode t)
@@ -168,15 +173,17 @@
   (global-font-lock-mode t)
   (global-git-gutter+-mode t)
   (global-linum-mode t)
+  (global-origami-mode t)
   (global-subword-mode t)
-  (helm-mode t)
   (helm-fuzzier-mode t)
+  (helm-mode t)
   (menu-bar-mode 0)
   (projectile-mode t)
   (savehist-mode t)
   (scroll-bar-mode 0)
   (show-paren-mode t)
-  (tool-bar-mode 0))
+  (tool-bar-mode 0)
+  (yas-global-mode 1))
 
 ;; default to utf-8 everywhere
 (set-terminal-coding-system 'utf-8)
@@ -186,10 +193,13 @@
 
 (add-hook 'go-mode-hook 'my-go-mode-hook)
 (add-hook 'enh-ruby-mode-hook 'my-ruby-mode-hook)
+(add-hook 'ruby-mode-hook 'my-ruby-mode-hook)
 (add-hook 'after-init-hook #'my-modes-hook)
+(add-hook 'before-save-hook #'whitespace-cleanup)
 
 (add-to-list 'auto-mode-alist
-	     '("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode))
+	     '("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . ruby-mode))
+	     ;'("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode))
 
 (with-eval-after-load 'go-mode
   (require 'go-autocomplete))
@@ -275,17 +285,18 @@
       (big-font-face)
       (put 'toggle-font 'state t))))
 
-(global-set-key [f5] 'toggle-theme)
-(global-set-key [f6] 'toggle-font)
+(global-set-key [f5] #'toggle-theme)
+(global-set-key [f6] #'toggle-font)
+(global-set-key [f9] #'magit-status)
 
 (provide 'init)
 
- ;;;  Jonas.Jarnestrom<at>ki.ericsson.se A smarter               
-  ;;;  find-tag that automagically reruns etags when it cant find a               
-  ;;;  requested item and then makes a new try to locate it.                      
-  ;;;  Fri Mar 15 09:52:14 2002    
+ ;;;  Jonas.Jarnestrom<at>ki.ericsson.se A smarter
+  ;;;  find-tag that automagically reruns etags when it cant find a
+  ;;;  requested item and then makes a new try to locate it.
+  ;;;  Fri Mar 15 09:52:14 2002
   ;; (defadvice find-tag (around refresh-etags activate)
-  ;;  "Rerun etags and reload tags if tag not found and redo find-tag.              
+  ;;  "Rerun etags and reload tags if tag not found and redo find-tag.
   ;;  If buffer is modified, ask about save before running etags."
   ;; (let ((extension (file-name-extension (buffer-file-name))))
   ;;   (condition-case err
@@ -300,7 +311,7 @@
   ;; "Run etags on all peer files in current dir and reload them silently."
   ;; (interactive)
   ;; (shell-command (format "etags *.%s" (or extension "el")))
-  ;; (let ((tags-revert-without-query t))  ; don't query, revert silently          
+  ;; (let ((tags-revert-without-query t))  ; don't query, revert silently
   ;;   (visit-tags-table default-directory nil)))
 
 ;;; init.el ends here
