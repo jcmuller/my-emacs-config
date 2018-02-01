@@ -10,3 +10,4 @@ projectile-bookmarks.eld
 recentf
 *.~undo-tree
 network-security.data
+.yas-compiled-snippets.el
