@@ -139,10 +139,6 @@
 (require 'helm-projectile)
 (require 'projectile-ripgrep)
 
-(global-set-key (kbd "M-x") #'helm-M-x)
-(global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
-(global-set-key (kbd "C-x C-f") #'helm-find-files)
-
 (with-eval-after-load 'evil-maps
   (define-key evil-normal-state-map (kbd "C-h") #'evil-window-left)
   (define-key evil-normal-state-map (kbd "C-j") #'evil-window-down)
@@ -159,11 +155,9 @@
 (evil-ex-define-cmd "ls" 'helm-mini)
 (evil-ex-define-cmd "Gblame" 'magit-blame-popup)
 (evil-ex-define-cmd "grep" 'projectile-ripgrep)
-(evil-ex-define-cmd "ts" 'xref-find-definitions)
+(evil-ex-define-cmd "ts" 'xref-find-definitions-with-prompt)
 
 (helm-projectile-on)
-
-(global-set-key (kbd "C-c g g") 'browse-at-remote)
 
 (defun neotree-project-dir ()
   "Open NeoTree using the git root."
@@ -177,8 +171,6 @@
 	      (neotree-dir project-dir)
 	      (neotree-find file-name)))
       (message "Could not find git project root."))))
-
-(global-set-key [f8] 'neotree-project-dir)
 
 (add-hook 'neo-change-root-hook
 	  (lambda () (neo-buffer--with-resizable-window
@@ -207,11 +199,23 @@
       (big-font-face)
       (put 'toggle-font 'state t))))
 
+(defun xref-find-definitions-with-prompt (identifier)
+  "Search for the definition of IDENTIFIER."
+  (interactive (list (xref--read-identifier "Find definitions of: ")))
+
+  (xref--find-definitions identifier nil))
+
+(global-set-key [f4] #'xref-find-definitions-with-prompt)
 (global-set-key [f5] #'toggle-theme)
 (global-set-key [f6] #'toggle-font)
+(global-set-key [f8] #'neotree-project-dir)
 (global-set-key [f9] #'magit-status)
 
-(provide 'init)
+(global-set-key (kbd "C-c g g") #'browse-at-remote)
+(global-set-key (kbd "C-x C-f") #'helm-find-files)
+(global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
+(global-set-key (kbd "M-x")     #'helm-M-x)
+(global-set-key (kbd "C-}")     #'xref-find-definitions-with-prompt)
 
  ;;;  Jonas.Jarnestrom<at>ki.ericsson.se A smarter
   ;;;  find-tag that automagically reruns etags when it cant find a
@@ -236,4 +240,5 @@
   ;; (let ((tags-revert-without-query t))  ; don't query, revert silently
   ;;   (visit-tags-table default-directory nil)))
 
+(provide 'init)
 ;;; init.el ends here
