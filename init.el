@@ -58,6 +58,7 @@
 
 (defun my-ruby-mode-hook ()
   "My Ruby mode hook."
+  (require 'bundler)
   (require 'rubocop)
   (require 'ruby-block)
   (require 'ruby-end)
