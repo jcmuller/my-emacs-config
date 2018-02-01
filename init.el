@@ -1,16 +1,214 @@
 ;;; init.el --- Configuration
 ;;; Commentary:
 ;;; Code:
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.milkbox.net/packages/") t)
 
+;; setup package.el
+(require 'package)
+(setq package-enable-at-startup nil)
+(add-to-list 'package-archives '("melpa" . "https://melpa.milkbox.net/packages/") t)
 (package-initialize)
+
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(eval-when-compile (require 'use-package))
 
 (add-to-list 'load-path "~/.emacs.d/lisp")
 (add-to-list 'backup-directory-alist '("." . "~/.emacs.d/backups"))
 
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
+
+;; package definition and  configuration
+(use-package ace-window :ensure t)
+(use-package browse-at-remote :ensure t :bind (("C-c g g" . #'browse-at-remote)))
+(use-package bundler :ensure t)
+
+(use-package color-theme-sanityinc-tomorrow
+  :ensure t
+  :bind ([f5] . #'toggle-theme)
+  :config
+  (defun toggle-theme ()
+    "Cycle font sizes."
+    (interactive)
+    (if (get 'toggle-theme 'state)
+	(progn
+	  (color-theme-sanityinc-tomorrow-day)
+	  (put 'toggle-theme 'state nil))
+      (progn
+	(color-theme-sanityinc-tomorrow-night)
+	(put 'toggle-theme 'state t))))
+  (load-theme 'sanityinc-tomorrow-day))
+
+(use-package dockerfile-mode :ensure t)
+(use-package editorconfig-custom-majormode :ensure t)
+(use-package editorconfig :ensure t)
+
+(use-package enh-ruby-mode
+  :ensure t
+  :config (add-hook 'enh-ruby-mode-hook 'my-ruby-mode-hook)
+  :custom
+  (enh-ruby-bounce-deep-indent nil)
+  (enh-ruby-deep-indent-construct nil)
+  (enh-ruby-deep-indent-paren nil)
+  (enh-ruby-hanging-brace-deep-indent-level 2)
+  (enh-ruby-hanging-brace-indent-level 2)
+  (enh-ruby-hanging-indent-level 2)
+  (enh-ruby-hanging-paren-deep-indent-level 2)
+  (enh-ruby-hanging-paren-indent-level 2)
+  (enh-ruby-indent-level 2))
+
+(use-package evil
+  :ensure t
+  :custom (evil-shift-width 2)
+  :config
+  (with-eval-after-load 'evil-maps
+    (define-key evil-normal-state-map (kbd "C-h") #'evil-window-left)
+    (define-key evil-normal-state-map (kbd "C-j") #'evil-window-down)
+    (define-key evil-normal-state-map (kbd "C-k") #'evil-window-up)
+    (define-key evil-normal-state-map (kbd "C-l") #'evil-window-right)
+    (define-key evil-normal-state-map (kbd "SPC f") #'neotree-find)
+    (define-key evil-normal-state-map (kbd "SPC SPC") #'neotree-toggle)
+    (define-key evil-window-map (kbd "]") #'xref-find-definitions-other-window)
+
+    (evil-define-key 'normal neotree-mode-map (kbd "q") 'neotree-hide)
+    (evil-define-key 'normal neotree-mode-map (kbd "RET") 'neotree-enter)
+    (evil-define-key 'normal neotree-mode-map (kbd "SPC") 'neotree-quick-look)
+    (evil-define-key 'normal neotree-mode-map (kbd "TAB") 'neotree-enter))
+
+  (evil-ex-define-cmd "Gblame" #'magit-blame-popup)
+  (evil-ex-define-cmd "Gbrowse" #'browse-at-remote)
+  (evil-ex-define-cmd "grep" #'projectile-ripgrep)
+  (evil-ex-define-cmd "ls" #'helm-mini)
+  (evil-ex-define-cmd "ts" 'xref-find-definitions-with-prompt))
+
+(use-package evil-magit :ensure t)
+(use-package evil-matchit :ensure t)
+(use-package evil-numbers :ensure t)
+(use-package evil-rails :ensure t)
+(use-package evil-surround :ensure t)
+(use-package evil-tabs :ensure t)
+(use-package evil-textobj-anyblock :ensure t)
+(use-package evil-textobj-column :ensure t)
+(use-package exec-path-from-shell :ensure t)
+
+(use-package flycheck
+  :ensure t
+  :custom
+  (flycheck-color-mode-line-face-to-color (quote mode-line-buffer-id)))
+
+(use-package gh-md :ensure t)
+
+(use-package git-gutter+
+  :ensure t
+  :custom
+  (git-gutter+-git-executable "/usr/bin/git"))
+
+(use-package go-autocomplete :ensure t)
+
+(use-package go-mode
+  :ensure t
+  :config
+  (defun my-go-mode-hook ()
+    "My Go mode hook."
+    (add-hook 'before-save-hook 'gofmt-before-save)
+    (local-set-key (kbd "m-.") 'godef-jump)
+    (local-set-key (kbd "m-*") 'pop-tag-mark))
+
+  (add-hook 'go-mode-hook 'my-go-mode-hook)
+  (setenv "gopath" "/home/jcmuller/go")
+  (add-to-list 'exec-path "/home/jcmuller/go/bin")
+  (with-eval-after-load 'go-mode (require 'go-autocomplete)))
+
+(use-package goto-last-change :ensure t)
+
+(use-package helm
+  :ensure t
+  :bind (("C-x C-f" . #'helm-find-files)
+	 ("C-x r b" . #'helm-filtered-bookmarks)
+	 ("C-x b" . #'helm-mini)
+	 ("M-x" . #'helm-M-x))
+  :custom
+  (helm-M-x-fuzzy-match t)
+  (helm-candidate-number-limit 50)
+  (helm-completion-in-region-fuzzy-match t)
+  (helm-exit-idle-delay 0)
+  (helm-ff-link-stype-map nil)
+  (helm-idle-delay 0.1)
+  (helm-input-idle-delay 0.1)
+  (helm-ls-git-fuzzy-match t)
+  (helm-mode-fuzzy-match t))
+
+(use-package helm-bundle-show :ensure t)
+(use-package helm-cmd-t :ensure t)
+(use-package helm-flx :ensure t)
+(use-package helm-flycheck :ensure t)
+(use-package helm-fuzzier :ensure t)
+(use-package helm-fuzzy-find :ensure t)
+(use-package helm-ls-git :ensure t)
+(use-package helm-projectile :ensure t :config (helm-projectile-on))
+
+(use-package magit
+  :ensure t
+  :bind ([f9] . 'magit-status)
+  :custom
+  (magit-commit-arguments (quote ("--verbose")))
+  (magit-git-executable "/usr/bin/git"))
+
+(use-package markdown-mode :ensure t)
+(use-package markdown-mode+ :ensure t)
+
+(use-package neotree
+  :ensure t
+  :bind ([f8] . #'neotree-project-dir)
+  :config
+  (defun neotree-project-dir ()
+    "Open NeoTree using the git root."
+    (interactive)
+    (let ((project-dir (projectile-project-root))
+	  (file-name (buffer-file-name)))
+      (neotree-toggle)
+      (if project-dir
+	  (if (neo-global--window-exists-p)
+	      (progn
+		(neotree-dir project-dir)
+		(neotree-find file-name)))
+	(message "Could not find git project root."))))
+
+  (add-hook 'neo-change-root-hook
+	    (lambda () (neo-buffer--with-resizable-window
+			(let ((fit-window-to-buffer-horizontally t))
+			  (fit-window-to-buffer))))))
+
+(use-package org-alert :ensure t)
+(use-package org-evil :ensure t)
+(use-package origami :ensure t)
+
+(use-package projectile
+  :ensure t
+  :custom
+  (projectile-switch-project-action (quote projectile-vc)))
+
+(use-package projectile-ripgrep :ensure t)
+(use-package ripgrep :ensure t)
+(use-package rubocop :ensure t :custom (rubocop-check-command "rubocop --format emacs"))
+(use-package ruby-end :ensure t :custom (ruby-end-insert-newline nil))
+(use-package ruby-extra-highlight :ensure t)
+(use-package ruby-refactor :ensure t :custom (ruby-refactor-add-parens t))
+
+(use-package ruby-mode
+  :config (add-hook 'ruby-mode-hook 'my-ruby-mode-hook)
+  :custom (ruby-deep-arglist nil))
+
+(use-package ruby-test-mode :ensure t)
+(use-package ruby-tools :ensure t)
+(use-package sentence-navigation :ensure t)
+(use-package thrift :ensure t)
+(use-package vdiff :ensure t)
+(use-package yaml-mode :ensure t)
+(use-package yasnippet :ensure t)
+(use-package yasnippet-snippets :ensure t)
 
 (defun big-font-face ()
   "Set big font face."
@@ -38,24 +236,12 @@
 
 (when window-system (set-exec-path-from-shell-path))
 
-(load-theme 'sanityinc-tomorrow-day)
-
-(setenv "gopath" "/home/jcmuller/go")
-
-(add-to-list 'exec-path "/home/jcmuller/go/bin")
-
 (add-to-list 'exec-path "/usr/bin")
 (add-to-list 'exec-path "/bin")
 (add-to-list 'exec-path "/home/jcmuller/bin")
 (add-to-list 'exec-path "/home/jcmuller/.rbenv/shims/bundle")
 
 ;; mode hooks
-(defun my-go-mode-hook ()
-  "My Go mode hook."
-  (add-hook 'before-save-hook 'gofmt-before-save)
-  (local-set-key (kbd "m-.") 'godef-jump)
-  (local-set-key (kbd "m-*") 'pop-tag-mark))
-
 (defun my-ruby-mode-hook ()
   "My Ruby mode hook."
   (require 'bundler)
@@ -113,80 +299,12 @@
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
 
-(add-hook 'go-mode-hook 'my-go-mode-hook)
-(add-hook 'enh-ruby-mode-hook 'my-ruby-mode-hook)
-(add-hook 'ruby-mode-hook 'my-ruby-mode-hook)
 (add-hook 'after-init-hook #'my-modes-hook)
 (add-hook 'before-save-hook #'whitespace-cleanup)
 
 (add-to-list 'auto-mode-alist
 	     '("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . ruby-mode))
-	     ;'("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode))
-
-(with-eval-after-load 'go-mode
-  (require 'go-autocomplete))
-
-(require 'browse-at-remote)
-(require 'evil)
-(require 'evil-magit)
-(require 'evil-tabs)
-(require 'find-file-in-project)
-(require 'helm-cmd-t)
-(require 'helm-fuzzy-find)
-(require 'helm-fuzzier)
-(require 'helm-config)
-(require 'helm-ls-git)
-(require 'helm-projectile)
-(require 'projectile-ripgrep)
-
-(with-eval-after-load 'evil-maps
-  (define-key evil-normal-state-map (kbd "C-h") #'evil-window-left)
-  (define-key evil-normal-state-map (kbd "C-j") #'evil-window-down)
-  (define-key evil-normal-state-map (kbd "C-k") #'evil-window-up)
-  (define-key evil-normal-state-map (kbd "C-l") #'evil-window-right)
-  (define-key evil-normal-state-map (kbd "SPC f") #'neotree-find)
-  (define-key evil-normal-state-map (kbd "SPC SPC") #'neotree-toggle)
-  (define-key evil-window-map (kbd "]") #'xref-find-definitions-other-window)
-  (evil-define-key 'normal neotree-mode-map (kbd "q") 'neotree-hide)
-  (evil-define-key 'normal neotree-mode-map (kbd "RET") 'neotree-enter)
-  (evil-define-key 'normal neotree-mode-map (kbd "SPC") 'neotree-quick-look)
-  (evil-define-key 'normal neotree-mode-map (kbd "TAB") 'neotree-enter))
-
-(evil-ex-define-cmd "ls" 'helm-mini)
-(evil-ex-define-cmd "Gblame" 'magit-blame-popup)
-(evil-ex-define-cmd "grep" 'projectile-ripgrep)
-(evil-ex-define-cmd "ts" 'xref-find-definitions-with-prompt)
-
-(helm-projectile-on)
-
-(defun neotree-project-dir ()
-  "Open NeoTree using the git root."
-  (interactive)
-  (let ((project-dir (projectile-project-root))
-	(file-name (buffer-file-name)))
-    (neotree-toggle)
-    (if project-dir
-	(if (neo-global--window-exists-p)
-	    (progn
-	      (neotree-dir project-dir)
-	      (neotree-find file-name)))
-      (message "Could not find git project root."))))
-
-(add-hook 'neo-change-root-hook
-	  (lambda () (neo-buffer--with-resizable-window
-		      (let ((fit-window-to-buffer-horizontally t))
-			(fit-window-to-buffer)))))
-
-(defun toggle-theme ()
-  "Cycle font sizes."
-  (interactive)
-  (if (get 'toggle-theme 'state)
-      (progn
-	(color-theme-sanityinc-tomorrow-day)
-	(put 'toggle-theme 'state nil))
-    (progn
-      (color-theme-sanityinc-tomorrow-night)
-      (put 'toggle-theme 'state t))))
+	    ;'("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode))
 
 (defun toggle-font ()
   "Cycle font sizes."
@@ -206,15 +324,7 @@
   (xref--find-definitions identifier nil))
 
 (global-set-key [f4] #'xref-find-definitions-with-prompt)
-(global-set-key [f5] #'toggle-theme)
 (global-set-key [f6] #'toggle-font)
-(global-set-key [f8] #'neotree-project-dir)
-(global-set-key [f9] #'magit-status)
-
-(global-set-key (kbd "C-c g g") #'browse-at-remote)
-(global-set-key (kbd "C-x C-f") #'helm-find-files)
-(global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
-(global-set-key (kbd "M-x")     #'helm-M-x)
 (global-set-key (kbd "C-}")     #'xref-find-definitions-with-prompt)
 
  ;;;  Jonas.Jarnestrom<at>ki.ericsson.se A smarter
