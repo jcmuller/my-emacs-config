@@ -23,13 +23,30 @@
 (load custom-file)
 
 ;; package definition and  configuration
-(use-package ace-window :ensure t)
-(use-package auto-complete :ensure t :delight)
-(use-package browse-at-remote :ensure t :bind (("C-c g g" . #'browse-at-remote)))
-(use-package bundler :ensure t :hook (ruby-mode enh-ruby-mode))
+(use-package ace-window)
+
+(use-package auto-complete
+  :delight
+  :custom
+  (ac-dwim t)
+  (ac-delay 0.4)
+  :config
+  (setq ac-sources '(ac-source-yasnippet
+		     ac-source-abbrev
+		     ac-source-words-in-same-mode-buffers))
+  (ac-config-default))
+
+(use-package ac-etags
+  :ensure t
+  :config
+  (ac-etags-setup)
+  (ac-etags-ac-setup))
+
+(use-package autorevert :delight auto-revert-mode)
+(use-package browse-at-remote :bind (("C-c g g" . #'browse-at-remote)))
+(use-package bundler :hook (ruby-mode enh-ruby-mode))
 
 (use-package color-theme-sanityinc-tomorrow
-  :ensure t
   :bind ([f5] . #'toggle-theme)
   :config
   (defun toggle-theme ()
