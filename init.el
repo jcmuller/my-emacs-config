@@ -22,8 +22,9 @@
 
 ;; package definition and  configuration
 (use-package ace-window :ensure t)
+(use-package auto-complete :ensure t :delight)
 (use-package browse-at-remote :ensure t :bind (("C-c g g" . #'browse-at-remote)))
-(use-package bundler :ensure t)
+(use-package bundler :ensure t :hook (ruby-mode enh-ruby-mode))
 
 (use-package color-theme-sanityinc-tomorrow
   :ensure t
@@ -92,9 +93,11 @@
 (use-package evil-textobj-anyblock :ensure t)
 (use-package evil-textobj-column :ensure t)
 (use-package exec-path-from-shell :ensure t)
+(use-package find-file-in-project :ensure t)
 
 (use-package flycheck
   :ensure t
+  :delight
   :custom
   (flycheck-color-mode-line-face-to-color (quote mode-line-buffer-id)))
 
@@ -102,19 +105,19 @@
 
 (use-package git-gutter+
   :ensure t
+  :delight
   :custom
   (git-gutter+-git-executable "/usr/bin/git"))
 
-(use-package go-autocomplete :ensure t)
+(use-package go-autocomplete :ensure t :hook go-mode)
 
 (use-package go-mode
   :ensure t
+  :bind (("M-." . #'godef-jump)
+	 ("M-*" . #'pop-tag-mark))
   :config
   (defun my-go-mode-hook ()
-    "My Go mode hook."
-    (add-hook 'before-save-hook 'gofmt-before-save)
-    (local-set-key (kbd "m-.") 'godef-jump)
-    (local-set-key (kbd "m-*") 'pop-tag-mark))
+    (add-hook 'before-save-hook 'gofmt-before-save))
 
   (add-hook 'go-mode-hook 'my-go-mode-hook)
   (setenv "gopath" "/home/jcmuller/go")
@@ -129,6 +132,7 @@
 	 ("C-x r b" . #'helm-filtered-bookmarks)
 	 ("C-x b" . #'helm-mini)
 	 ("M-x" . #'helm-M-x))
+  :delight
   :custom
   (helm-M-x-fuzzy-match t)
   (helm-candidate-number-limit 50)
@@ -151,11 +155,12 @@
 
 (use-package magit
   :ensure t
-  :bind ([f9] . 'magit-status)
+  :bind ([f9] . #'magit-status)
   :custom
   (magit-commit-arguments (quote ("--verbose")))
   (magit-git-executable "/usr/bin/git"))
 
+(use-package magit-popup :ensure t)
 (use-package markdown-mode :ensure t)
 (use-package markdown-mode+ :ensure t)
 
@@ -185,29 +190,35 @@
 (use-package org-evil :ensure t)
 (use-package origami :ensure t)
 
+(use-package delight :ensure t)
+
+(use-package autorevert :delight auto-revert-mode)
+(use-package subword :delight)
+
 (use-package projectile
   :ensure t
-  :custom
-  (projectile-switch-project-action (quote projectile-vc)))
+  :custom (projectile-switch-project-action (quote projectile-vc))
+  :delight '(:eval (concat " Proj:" (projectile-project-name))))
 
+(use-package projectile-rails :ensure t :delight :hook (ruby-mode enh-ruby-mode))
 (use-package projectile-ripgrep :ensure t)
 (use-package ripgrep :ensure t)
-(use-package rubocop :ensure t :custom (rubocop-check-command "rubocop --format emacs"))
-(use-package ruby-end :ensure t :custom (ruby-end-insert-newline nil))
-(use-package ruby-extra-highlight :ensure t)
-(use-package ruby-refactor :ensure t :custom (ruby-refactor-add-parens t))
+(use-package rubocop :ensure t :delight :custom (rubocop-check-command "rubocop --format emacs") :hook (ruby-mode enh-ruby-mode))
+(use-package ruby-end :ensure t :delight :custom (ruby-end-insert-newline nil))
+(use-package ruby-extra-highlight :ensure t :hook (ruby-mode enh-ruby-mode))
+(use-package ruby-refactor :ensure t :custom (ruby-refactor-add-parens t) :hook (ruby-mode enh-ruby-mode))
 
 (use-package ruby-mode
   :config (add-hook 'ruby-mode-hook 'my-ruby-mode-hook)
   :custom (ruby-deep-arglist nil))
 
-(use-package ruby-test-mode :ensure t)
-(use-package ruby-tools :ensure t)
+(use-package ruby-test-mode :ensure t :delight :hook (ruby-mode enh-ruby-mode))
+(use-package ruby-tools :commands ruby-tools-mode :ensure t)
 (use-package sentence-navigation :ensure t)
-(use-package thrift :ensure t)
+(use-package undo-tree :ensure t :delight)
 (use-package vdiff :ensure t)
 (use-package yaml-mode :ensure t)
-(use-package yasnippet :ensure t)
+(use-package yasnippet :ensure t :delight yas-minor-mode)
 (use-package yasnippet-snippets :ensure t)
 
 (defun big-font-face ()
@@ -227,11 +238,11 @@
 (defun set-exec-path-from-shell-path ()
   "Override exec path."
   (let ((path-from-shell (replace-regexp-in-string
-    "[ \t\n]*$"
-    ""
-    (shell-command-to-string "$shell --login -i -c 'echo $path'"))))
+			  "[ \t\n]*$"
+			  ""
+			  (shell-command-to-string "$shell --login -i -c 'echo $path'"))))
     (setenv "path" path-from-shell)
-    ;(setq eshell-path-env path-from-shell) ; for eshell users
+					;(setq eshell-path-env path-from-shell) ; for eshell users
     (setq exec-path (split-string path-from-shell path-separator))))
 
 (when window-system (set-exec-path-from-shell-path))
@@ -244,16 +255,6 @@
 ;; mode hooks
 (defun my-ruby-mode-hook ()
   "My Ruby mode hook."
-  (require 'bundler)
-  (require 'rubocop)
-  (require 'ruby-block)
-  (require 'ruby-end)
-  (require 'ruby-extra-highlight)
-  (require 'ruby-refactor)
-  (require 'ruby-test-mode)
-  (require 'ruby-tools)
-
-  (auto-complete-mode)
   (electric-pair-mode)
   (projectile-rails-mode)
   (rubocop-mode t)
@@ -267,8 +268,6 @@
 
 (defun my-modes-hook ()
   "My global hook."
-  (require 'origami)
-  (require 'yasnippet)
 
   (column-number-mode t)
   (dynamic-completion-mode t)
@@ -298,13 +297,14 @@
 (set-keyboard-coding-system 'utf-8)
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
+(universal-coding-system-argument 'utf-8)
 
 (add-hook 'after-init-hook #'my-modes-hook)
 (add-hook 'before-save-hook #'whitespace-cleanup)
 
 (add-to-list 'auto-mode-alist
 	     '("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . ruby-mode))
-	    ;'("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode))
+					;'("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode))
 
 (defun toggle-font ()
   "Cycle font sizes."
@@ -327,28 +327,38 @@
 (global-set-key [f6] #'toggle-font)
 (global-set-key (kbd "C-}")     #'xref-find-definitions-with-prompt)
 
+;; Shorten git branch name
+(defun my-shorten-vc-mode-line (string)
+  "Shorten VC mode STRING line."
+  (cond
+   ((string-prefix-p "Git" string)
+    (concat "" (substring string 4)))
+   (t string)))
+
+(advice-add 'vc-git-mode-line-string :filter-return 'my-shorten-vc-mode-line)
+
  ;;;  Jonas.Jarnestrom<at>ki.ericsson.se A smarter
   ;;;  find-tag that automagically reruns etags when it cant find a
   ;;;  requested item and then makes a new try to locate it.
   ;;;  Fri Mar 15 09:52:14 2002
-  ;; (defadvice find-tag (around refresh-etags activate)
-  ;;  "Rerun etags and reload tags if tag not found and redo find-tag.
-  ;;  If buffer is modified, ask about save before running etags."
-  ;; (let ((extension (file-name-extension (buffer-file-name))))
-  ;;   (condition-case err
-  ;;   ad-do-it
-  ;;     (error (and (buffer-modified-p)
-  ;;         (not (ding))
-  ;;         (y-or-n-p "Buffer is modified, save it? ")
-  ;;         (save-buffer))
-  ;;        (er-refresh-etags extension)
-  ;;        ad-do-it))))
-  ;; (defun er-refresh-etags (&optional extension)
-  ;; "Run etags on all peer files in current dir and reload them silently."
-  ;; (interactive)
-  ;; (shell-command (format "etags *.%s" (or extension "el")))
-  ;; (let ((tags-revert-without-query t))  ; don't query, revert silently
-  ;;   (visit-tags-table default-directory nil)))
+;; (defadvice find-tag (around refresh-etags activate)
+;;  "Rerun etags and reload tags if tag not found and redo find-tag.
+;;  If buffer is modified, ask about save before running etags."
+;; (let ((extension (file-name-extension (buffer-file-name))))
+;;   (condition-case err
+;;   ad-do-it
+;;     (error (and (buffer-modified-p)
+;;         (not (ding))
+;;         (y-or-n-p "Buffer is modified, save it? ")
+;;         (save-buffer))
+;;        (er-refresh-etags extension)
+;;        ad-do-it))))
+;; (defun er-refresh-etags (&optional extension)
+;; "Run etags on all peer files in current dir and reload them silently."
+;; (interactive)
+;; (shell-command (format "etags *.%s" (or extension "el")))
+;; (let ((tags-revert-without-query t))  ; don't query, revert silently
+;;   (visit-tags-table default-directory nil)))
 
 (provide 'init)
 ;;; init.el ends here
