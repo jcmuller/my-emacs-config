@@ -61,12 +61,12 @@
 	(put 'toggle-theme 'state t))))
   (load-theme 'sanityinc-tomorrow-day))
 
-(use-package dockerfile-mode :ensure t)
-(use-package editorconfig-custom-majormode :ensure t)
-(use-package editorconfig :ensure t)
+(use-package delight)
+(use-package dockerfile-mode)
+(use-package editorconfig-custom-majormode)
+(use-package editorconfig)
 
 (use-package enh-ruby-mode
-  :ensure t
   :config (add-hook 'enh-ruby-mode-hook 'my-ruby-mode-hook)
   :custom
   (enh-ruby-bounce-deep-indent nil)
@@ -80,7 +80,6 @@
   (enh-ruby-indent-level 2))
 
 (use-package evil
-  :ensure t
   :custom (evil-shift-width 2)
   :config
   (with-eval-after-load 'evil-maps
@@ -103,35 +102,23 @@
   (evil-ex-define-cmd "ls" #'helm-mini)
   (evil-ex-define-cmd "ts" 'xref-find-definitions-with-prompt))
 
-(use-package evil-magit :ensure t)
-(use-package evil-matchit :ensure t)
-(use-package evil-numbers :ensure t)
-(use-package evil-rails :ensure t)
-(use-package evil-surround :ensure t)
-(use-package evil-tabs :ensure t)
-(use-package evil-textobj-anyblock :ensure t)
-(use-package evil-textobj-column :ensure t)
-(use-package exec-path-from-shell :ensure t)
-(use-package find-file-in-project :ensure t)
+(use-package evil-magit)
+(use-package evil-matchit)
+(use-package evil-numbers)
+(use-package evil-rails)
+(use-package evil-surround)
+(use-package evil-tabs)
+(use-package evil-textobj-anyblock)
+(use-package evil-textobj-column)
+(use-package exec-path-from-shell)
+(use-package find-file-in-project)
 
-(use-package flycheck
-  :ensure t
-  :delight
-  :custom
-  (flycheck-color-mode-line-face-to-color (quote mode-line-buffer-id)))
-
-(use-package gh-md :ensure t)
-
-(use-package git-gutter+
-  :ensure t
-  :delight
-  :custom
-  (git-gutter+-git-executable "/usr/bin/git"))
-
-(use-package go-autocomplete :ensure t :hook go-mode)
+(use-package flycheck :delight :custom (flycheck-color-mode-line-face-to-color (quote mode-line-buffer-id)))
+(use-package gh-md)
+(use-package git-gutter+ :delight :custom (git-gutter+-git-executable "/usr/bin/git"))
+(use-package go-autocomplete :hook go-mode)
 
 (use-package go-mode
-  :ensure t
   :bind (("M-." . #'godef-jump)
 	 ("M-*" . #'pop-tag-mark))
   :config
@@ -143,10 +130,9 @@
   (add-to-list 'exec-path "/home/jcmuller/go/bin")
   (with-eval-after-load 'go-mode (require 'go-autocomplete)))
 
-(use-package goto-last-change :ensure t)
+(use-package goto-last-change)
 
 (use-package helm
-  :ensure t
   :bind (("C-x C-f" . #'helm-find-files)
 	 ("C-x r b" . #'helm-filtered-bookmarks)
 	 ("C-x b" . #'helm-mini)
@@ -163,28 +149,27 @@
   (helm-ls-git-fuzzy-match t)
   (helm-mode-fuzzy-match t))
 
-(use-package helm-bundle-show :ensure t)
-(use-package helm-cmd-t :ensure t)
-(use-package helm-flx :ensure t)
-(use-package helm-flycheck :ensure t)
-(use-package helm-fuzzier :ensure t)
-(use-package helm-fuzzy-find :ensure t)
-(use-package helm-ls-git :ensure t)
-(use-package helm-projectile :ensure t :config (helm-projectile-on))
+(use-package helm-bundle-show)
+(use-package helm-cmd-t)
+(use-package helm-flx)
+(use-package helm-flycheck)
+(use-package helm-fuzzier)
+(use-package helm-fuzzy-find)
+(use-package helm-ls-git)
+(use-package helm-projectile :config (helm-projectile-on))
 
 (use-package magit
-  :ensure t
+
   :bind ([f9] . #'magit-status)
   :custom
   (magit-commit-arguments (quote ("--verbose")))
   (magit-git-executable "/usr/bin/git"))
 
-(use-package magit-popup :ensure t)
-(use-package markdown-mode :ensure t)
-(use-package markdown-mode+ :ensure t)
+(use-package magit-popup)
+(use-package markdown-mode)
+(use-package markdown-mode+)
 
 (use-package neotree
-  :ensure t
   :bind ([f8] . #'neotree-project-dir)
   :config
   (defun neotree-project-dir ()
@@ -205,40 +190,35 @@
 			(let ((fit-window-to-buffer-horizontally t))
 			  (fit-window-to-buffer))))))
 
-(use-package org-alert :ensure t)
-(use-package org-evil :ensure t)
-(use-package origami :ensure t)
-
-(use-package delight :ensure t)
-
-(use-package autorevert :delight auto-revert-mode)
+(use-package org-alert)
+(use-package org-evil)
+(use-package origami)
 (use-package subword :delight)
 
 (use-package projectile
-  :ensure t
   :custom (projectile-switch-project-action (quote projectile-vc))
   :delight '(:eval (concat " Proj:" (projectile-project-name))))
 
-(use-package projectile-rails :ensure t :delight :hook (ruby-mode enh-ruby-mode))
-(use-package projectile-ripgrep :ensure t)
-(use-package ripgrep :ensure t)
-(use-package rubocop :ensure t :delight :custom (rubocop-check-command "rubocop --format emacs") :hook (ruby-mode enh-ruby-mode))
-(use-package ruby-end :ensure t :delight :custom (ruby-end-insert-newline nil))
-(use-package ruby-extra-highlight :ensure t :hook (ruby-mode enh-ruby-mode))
-(use-package ruby-refactor :ensure t :custom (ruby-refactor-add-parens t) :hook (ruby-mode enh-ruby-mode))
+(use-package projectile-rails :delight :hook (ruby-mode enh-ruby-mode))
+(use-package projectile-ripgrep)
+(use-package ripgrep)
+(use-package rubocop :delight :custom (rubocop-check-command "rubocop --format emacs") :hook (ruby-mode enh-ruby-mode))
+(use-package ruby-end :delight :custom (ruby-end-insert-newline nil))
+(use-package ruby-extra-highlight :hook (ruby-mode enh-ruby-mode))
+(use-package ruby-refactor :custom (ruby-refactor-add-parens t) :hook (ruby-mode enh-ruby-mode))
 
 (use-package ruby-mode
   :config (add-hook 'ruby-mode-hook 'my-ruby-mode-hook)
   :custom (ruby-deep-arglist nil))
 
-(use-package ruby-test-mode :ensure t :delight :hook (ruby-mode enh-ruby-mode))
-(use-package ruby-tools :commands ruby-tools-mode :ensure t)
-(use-package sentence-navigation :ensure t)
-(use-package undo-tree :ensure t :delight)
-(use-package vdiff :ensure t)
-(use-package yaml-mode :ensure t)
-(use-package yasnippet :ensure t :delight yas-minor-mode)
-(use-package yasnippet-snippets :ensure t)
+(use-package ruby-test-mode :delight :hook (ruby-mode enh-ruby-mode))
+(use-package ruby-tools :commands ruby-tools-mode)
+(use-package sentence-navigation)
+(use-package undo-tree :delight)
+(use-package vdiff)
+(use-package yaml-mode)
+(use-package yasnippet :delight yas-minor-mode)
+(use-package yasnippet-snippets)
 
 (defun big-font-face ()
   "Set big font face."
