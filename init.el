@@ -27,6 +27,7 @@
 
 (use-package auto-complete
   :delight
+  :defer
   :custom
   (ac-dwim t)
   (ac-delay 0.4)
@@ -192,16 +193,32 @@
 
 (use-package org-alert)
 (use-package org-evil)
+
+(use-package org
+  :custom
+  (org-log-done t))
+
 (use-package origami)
 (use-package subword :delight)
 
+(defun my-projectile-switch-project-action ()
+  "Load this thing."
+  (projectile-vc)
+  (ac-etags-clear-cache)
+  (message "Ran project action."))
+
 (use-package projectile
-  :custom (projectile-switch-project-action (quote projectile-vc))
+  :custom
+  (projectile-switch-project-action (quote my-projectile-switch-project-action))
+  (projectile-enable-caching t)
   :delight '(:eval (concat " Proj:" (projectile-project-name))))
 
 (use-package projectile-rails :delight :hook (ruby-mode enh-ruby-mode))
 (use-package projectile-ripgrep)
 (use-package ripgrep)
+(use-package rspec-mode
+  :config
+  (rspec-install-snippets))
 (use-package rubocop :delight :custom (rubocop-check-command "rubocop --format emacs") :hook (ruby-mode enh-ruby-mode))
 (use-package ruby-end :delight :custom (ruby-end-insert-newline nil))
 (use-package ruby-extra-highlight :hook (ruby-mode enh-ruby-mode))
@@ -296,7 +313,6 @@
 (set-keyboard-coding-system 'utf-8)
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
-(universal-coding-system-argument 'utf-8)
 
 (add-hook 'after-init-hook #'my-modes-hook)
 (add-hook 'before-save-hook #'whitespace-cleanup)
