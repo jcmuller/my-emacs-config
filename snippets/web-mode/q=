@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ERB insert output
+# key: q=
+# --
+<%= $0 %>
