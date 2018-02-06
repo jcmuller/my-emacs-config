@@ -271,6 +271,7 @@
 (use-package ruby-test-mode :delight :hook (ruby-mode enh-ruby-mode))
 (use-package ruby-tools :commands ruby-tools-mode)
 (use-package sentence-navigation)
+(use-package subword :delight)
 (use-package undo-tree :delight)
 (use-package vdiff)
 (use-package yaml-mode)
