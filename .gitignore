@@ -11,3 +11,4 @@ recentf
 *.~undo-tree
 network-security.data
 .yas-compiled-snippets.el
+projectile.cache
