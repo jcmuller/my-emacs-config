@@ -116,7 +116,6 @@
 (use-package evil-tabs)
 (use-package evil-textobj-anyblock)
 (use-package evil-textobj-column)
-(use-package exec-path-from-shell)
 (use-package find-file-in-project)
 
 (use-package flycheck :delight :custom (flycheck-color-mode-line-face-to-color (quote mode-line-buffer-id)))
@@ -129,12 +128,10 @@
          ("M-*" . #'pop-tag-mark))
   :config
   (defun my-go-mode-hook ()
-    ;;(exec-path-from-shell-initialize)
     (add-hook 'before-save-hook 'gofmt-before-save))
 
   (add-hook 'go-mode-hook 'my-go-mode-hook)
   (setenv "gopath" "/home/jcmuller/go")
-  ;; (add-to-list 'exec-path "/home/jcmuller/go/bin")
   (with-eval-after-load 'go-mode (require 'go-autocomplete)))
 
 (use-package goto-last-change)
@@ -312,23 +309,6 @@
   (custom-set-faces '(default ((t (:family "Terminus" :foundry "xos4" :slant normal :weight normal :height 90 :width normal))))))
 
 (small-font-face)
-
-(defun set-exec-path-from-shell-path ()
-  "Override exec path."
-  (let ((path-from-shell (replace-regexp-in-string
-			  "[ \t\n]*$"
-			  ""
-			  (shell-command-to-string "$shell --login -i -c 'echo $path'"))))
-    (setenv "path" path-from-shell)
-					;(setq eshell-path-env path-from-shell) ; for eshell users
-    (setq exec-path (split-string path-from-shell path-separator))))
-
-(when window-system (set-exec-path-from-shell-path))
-
-(add-to-list 'exec-path "/usr/bin")
-(add-to-list 'exec-path "/bin")
-(add-to-list 'exec-path "/home/jcmuller/bin")
-(add-to-list 'exec-path "/home/jcmuller/.rbenv/shims/bundle")
 
 ;; mode hooks
 (defun my-ruby-mode-hook ()
