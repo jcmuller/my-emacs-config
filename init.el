@@ -274,6 +274,27 @@
 (use-package subword :delight)
 (use-package undo-tree :delight)
 (use-package vdiff)
+
+(use-package web-mode
+  :mode "\\.html\\'" "\\.erb\\'" "\\.ejs\\'"
+  :custom
+                                        ;(web-mode-ac-sources-alist '(("erb" . (ac-source-erb-property))))
+  (web-mode-enable-current-element-highlight t)
+  (web-mode-enable-auto-pairing t)
+  (web-mode-extra-snippets '(("erb" . (
+                                       ("q=" . "<%= | %>")
+                                       ("qq" . "<% | %>")
+                                       )
+                              )))
+  (web-mode-markup-indent-offset 2)
+  (web-mode-css-indent-offset 2)
+  (web-mode-code-indent-offset 2)
+  (web-mode-attr-indent-offset 2)
+  :config
+  (ac-etags-setup)
+  (ac-etags-ac-setup)
+  (flycheck-add-mode 'html-tidy 'web-mode))
+
 (use-package yaml-mode)
 (use-package yasnippet :delight yas-minor-mode)
 (use-package yasnippet-snippets)
