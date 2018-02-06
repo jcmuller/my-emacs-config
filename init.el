@@ -33,8 +33,8 @@
   (ac-delay 0.4)
   :config
   (setq ac-sources '(ac-source-yasnippet
-		     ac-source-abbrev
-		     ac-source-words-in-same-mode-buffers))
+                     ac-source-abbrev
+                     ac-source-words-in-same-mode-buffers))
   (ac-config-default))
 
 (use-package ac-etags
@@ -54,12 +54,12 @@
     "Cycle font sizes."
     (interactive)
     (if (get 'toggle-theme 'state)
-	(progn
-	  (color-theme-sanityinc-tomorrow-day)
-	  (put 'toggle-theme 'state nil))
+        (progn
+          (color-theme-sanityinc-tomorrow-day)
+          (put 'toggle-theme 'state nil))
       (progn
-	(color-theme-sanityinc-tomorrow-night)
-	(put 'toggle-theme 'state t))))
+        (color-theme-sanityinc-tomorrow-night)
+        (put 'toggle-theme 'state t))))
   (load-theme 'sanityinc-tomorrow-day))
 
 (use-package delight)
@@ -126,23 +126,24 @@
 
 (use-package go-mode
   :bind (("M-." . #'godef-jump)
-	 ("M-*" . #'pop-tag-mark))
+         ("M-*" . #'pop-tag-mark))
   :config
   (defun my-go-mode-hook ()
+    ;;(exec-path-from-shell-initialize)
     (add-hook 'before-save-hook 'gofmt-before-save))
 
   (add-hook 'go-mode-hook 'my-go-mode-hook)
   (setenv "gopath" "/home/jcmuller/go")
-  (add-to-list 'exec-path "/home/jcmuller/go/bin")
+  ;; (add-to-list 'exec-path "/home/jcmuller/go/bin")
   (with-eval-after-load 'go-mode (require 'go-autocomplete)))
 
 (use-package goto-last-change)
 
 (use-package helm
   :bind (("C-x C-f" . #'helm-find-files)
-	 ("C-x r b" . #'helm-filtered-bookmarks)
-	 ("C-x b" . #'helm-mini)
-	 ("M-x" . #'helm-M-x))
+         ("C-x r b" . #'helm-filtered-bookmarks)
+         ("C-x b" . #'helm-mini)
+         ("M-x" . #'helm-M-x))
   :delight
   :custom
   (helm-M-x-fuzzy-match t)
@@ -232,35 +233,24 @@
     "Open NeoTree using the git root."
     (interactive)
     (let ((project-dir (projectile-project-root))
-	  (file-name (buffer-file-name)))
+          (file-name (buffer-file-name)))
       (neotree-toggle)
       (if project-dir
-	  (if (neo-global--window-exists-p)
-	      (progn
-		(neotree-dir project-dir)
-		(neotree-find file-name)))
-	(message "Could not find git project root."))))
+          (if (neo-global--window-exists-p)
+              (progn
+                (neotree-dir project-dir)
+                (neotree-find file-name)))
+        (message "Could not find git project root."))))
 
   (add-hook 'neo-change-root-hook
-	    (lambda () (neo-buffer--with-resizable-window
-			(let ((fit-window-to-buffer-horizontally t))
-			  (fit-window-to-buffer))))))
+            (lambda () (neo-buffer--with-resizable-window
+                        (let ((fit-window-to-buffer-horizontally t))
+                          (fit-window-to-buffer))))))
 
 (use-package org-alert)
 (use-package org-evil)
-
-(use-package org
-  :custom
-  (org-log-done t))
-
+(use-package org :custom (org-log-done t))
 (use-package origami)
-(use-package subword :delight)
-
-(defun my-projectile-switch-project-action ()
-  "Load this thing."
-  (projectile-vc)
-  (ac-etags-clear-cache)
-  (message "Ran project action."))
 
 (use-package projectile
   :custom
@@ -271,18 +261,12 @@
 (use-package projectile-rails :delight :hook (ruby-mode enh-ruby-mode))
 (use-package projectile-ripgrep)
 (use-package ripgrep)
-(use-package rspec-mode
-  :config
-  (rspec-install-snippets))
+(use-package rspec-mode :config (rspec-install-snippets) :mode "\\.rb\'")
 (use-package rubocop :delight :custom (rubocop-check-command "rubocop --format emacs") :hook (ruby-mode enh-ruby-mode))
 (use-package ruby-end :delight :custom (ruby-end-insert-newline nil))
 (use-package ruby-extra-highlight :hook (ruby-mode enh-ruby-mode))
 (use-package ruby-refactor :custom (ruby-refactor-add-parens t) :hook (ruby-mode enh-ruby-mode))
-
-(use-package ruby-mode
-  :config (add-hook 'ruby-mode-hook 'my-ruby-mode-hook)
-  :custom (ruby-deep-arglist nil))
-
+(use-package ruby-mode :config (add-hook 'ruby-mode-hook 'my-ruby-mode-hook) :custom (ruby-deep-arglist nil))
 (use-package ruby-test-mode :delight :hook (ruby-mode enh-ruby-mode))
 (use-package ruby-tools :commands ruby-tools-mode)
 (use-package sentence-navigation)
@@ -369,20 +353,39 @@
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
 
+(defun my-projectile-switch-project-action ()
+  "Load this thing."
+  (projectile-vc)
+  (ac-etags-clear-cache)
+  (message "Ran project action."))
+
+(defun remove-dup-empty-lines ()
+  "Remove duplicate empty lines."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward "\n\n+" nil t) (replace-match "\n\n"))))
+
+(defun my-whitespace-cleanup ()
+  "Remove whitespace."
+  (interactive)
+  (whitespace-cleanup)
+  (remove-dup-empty-lines))
+
 (add-hook 'after-init-hook #'my-modes-hook)
-(add-hook 'before-save-hook #'whitespace-cleanup)
+(add-hook 'before-save-hook #'my-whitespace-cleanup)
 
 (add-to-list 'auto-mode-alist
-	     '("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . ruby-mode))
-					;'("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode))
+             '("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . ruby-mode))
+                                        ;'("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode))
 
 (defun toggle-font ()
   "Cycle font sizes."
   (interactive)
   (if (get 'toggle-font 'state)
       (progn
-	(small-font-face)
-	(put 'toggle-font 'state nil))
+        (small-font-face)
+        (put 'toggle-font 'state nil))
     (progn
       (big-font-face)
       (put 'toggle-font 'state t))))
