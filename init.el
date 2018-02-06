@@ -70,6 +70,11 @@
 (use-package enh-ruby-mode
   :config (add-hook 'enh-ruby-mode-hook 'my-ruby-mode-hook)
   :custom
+  (auto-complete-mode)
+  (ruby-end-mode)
+  (flycheck-mode)
+  (electric-pair-mode)
+
   (enh-ruby-bounce-deep-indent nil)
   (enh-ruby-deep-indent-construct nil)
   (enh-ruby-deep-indent-paren nil)
