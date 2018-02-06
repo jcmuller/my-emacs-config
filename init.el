@@ -164,6 +164,56 @@
 (use-package helm-ls-git)
 (use-package helm-projectile :config (helm-projectile-on))
 
+(use-package json-mode
+  :init (setq js-indent-level 2))
+
+(use-package js2-mode
+  :mode (("\\.js\\'" . js2-jsx-mode))
+  :init
+  :custom
+  (js2-highlight-level 3)
+  (js2-mode-assume-strict t)
+  (js2-strict-trailing-comma-warning nil)
+  (js2-missing-semi-one-line-override t)
+  (js2-allow-rhino-new-expr-initializer nil)
+  (js2-global-externs '(
+                        "afterAll"
+                        "afterEach"
+                        "beforeAll"
+                        "beforeEach"
+                        "describe"
+                        "expect"
+                        "it"
+                        "jest"
+                        "require"
+                        "test"))
+  (js2-include-node-externs t)
+  (js2-warn-about-unused-function-arguments t)
+  (js2-basic-offset 2)
+  (js-switch-indent-offset 2)
+  (add-hook 'js2-mode-hook (lambda ()
+                             (subword-mode 1)
+                             (diminish 'subword-mode)
+                             (js2-imenu-extras-mode 1)))
+  (rename-modeline "js2-mode" js2-mode "JS2")
+  (rename-modeline "js2-mode" js2-jsx-mode "JSX2")
+  :config
+  (electric-pair-mode)
+  (use-package tern
+    :diminish tern-mode
+    :init
+    (add-hook 'js2-mode-hook 'tern-mode))
+  (use-package js-doc)
+  (use-package js2-refactor
+    :diminish js2-refactor-mode
+    :init
+    (add-hook 'js2-mode-hook #'js2-refactor-mode)
+    :config
+    (js2r-add-keybindings-with-prefix "C-c r")))
+
+(use-package jsx-mode
+  :init (setq jsx-indent-level 2))
+
 (use-package magit
 
   :bind ([f9] . #'magit-status)
