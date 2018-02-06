@@ -258,6 +258,7 @@
   (projectile-enable-caching t)
   :delight '(:eval (concat " Proj:" (projectile-project-name))))
 
+(use-package pdf-tools :magic ("%PDF" . pdf-view-mode) :config (pdf-tools-install))
 (use-package projectile-rails :delight :hook (ruby-mode enh-ruby-mode))
 (use-package projectile-ripgrep)
 (use-package ripgrep)
