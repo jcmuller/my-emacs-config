@@ -30,7 +30,7 @@
   :defer
   :custom
   (ac-dwim t)
-  (ac-delay 0.4)
+  (ac-delay 0.2)
   :config
   (setq ac-sources '(ac-source-yasnippet
                      ac-source-abbrev
