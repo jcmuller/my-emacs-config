@@ -67,13 +67,14 @@
 (use-package editorconfig)
 
 (use-package enh-ruby-mode
-  :config (add-hook 'enh-ruby-mode-hook 'my-enh-ruby-mode-hook)
-  :custom
+  :config
+  (add-hook 'enh-ruby-mode-hook 'my-enh-ruby-mode-hook)
   (auto-complete-mode)
   (ruby-end-mode)
   (flycheck-mode)
   (electric-pair-mode)
 
+  :custom
   (enh-ruby-bounce-deep-indent nil)
   (enh-ruby-deep-indent-construct nil)
   (enh-ruby-deep-indent-paren nil)
@@ -176,11 +177,15 @@
 (use-package js2-mode
   :mode (("\\.js\\'" . js2-jsx-mode))
   :custom
+  (js2-allow-rhino-new-expr-initializer nil)
+  (js2-basic-offset 2)
   (js2-highlight-level 3)
+  (js2-include-node-externs t)
+  (js2-missing-semi-one-line-override t)
   (js2-mode-assume-strict t)
   (js2-strict-trailing-comma-warning nil)
-  (js2-missing-semi-one-line-override t)
-  (js2-allow-rhino-new-expr-initializer nil)
+  (js2-warn-about-unused-function-arguments t)
+  (js-switch-indent-offset 2)
   (js2-global-externs '(
                         "afterAll"
                         "afterEach"
@@ -192,10 +197,6 @@
                         "jest"
                         "require"
                         "test"))
-  (js2-include-node-externs t)
-  (js2-warn-about-unused-function-arguments t)
-  (js2-basic-offset 2)
-  (js-switch-indent-offset 2)
   (add-hook 'js2-mode-hook (lambda ()
                              ;;(subword-mode 1)
                              ;;(diminish 'subword-mode)
@@ -220,7 +221,6 @@
   :init (setq jsx-indent-level 2))
 
 (use-package magit
-
   :bind ([f9] . #'magit-status)
   :custom
   (magit-commit-arguments (quote ("--verbose")))
@@ -307,18 +307,17 @@
 (use-package web-mode
   :mode "\\.html\\'" "\\.erb\\'" "\\.ejs\\'"
   :custom
-                                        ;(web-mode-ac-sources-alist '(("erb" . (ac-source-erb-property))))
-  (web-mode-enable-current-element-highlight t)
+  (web-mode-attr-indent-offset 2)
+  (web-mode-code-indent-offset 2)
+  (web-mode-css-indent-offset 2)
   (web-mode-enable-auto-pairing t)
+  (web-mode-enable-current-element-highlight t)
+  (web-mode-markup-indent-offset 2)
   (web-mode-extra-snippets '(("erb" . (
                                        ("q=" . "<%= | %>")
                                        ("qq" . "<% | %>")
                                        )
                               )))
-  (web-mode-markup-indent-offset 2)
-  (web-mode-css-indent-offset 2)
-  (web-mode-code-indent-offset 2)
-  (web-mode-attr-indent-offset 2)
   :config
   (ac-etags-setup)
   (ac-etags-ac-setup)
