@@ -45,7 +45,6 @@
 
 (use-package autorevert :delight auto-revert-mode)
 (use-package browse-at-remote :bind (("C-c g g" . #'browse-at-remote)))
-(use-package bundler :hook (ruby-mode enh-ruby-mode))
 
 (use-package color-theme-sanityinc-tomorrow
   :bind ([f5] . #'toggle-theme)
@@ -68,7 +67,7 @@
 (use-package editorconfig)
 
 (use-package enh-ruby-mode
-  :config (add-hook 'enh-ruby-mode-hook 'my-ruby-mode-hook)
+  :config (add-hook 'enh-ruby-mode-hook 'my-enh-ruby-mode-hook)
   :custom
   (auto-complete-mode)
   (ruby-end-mode)
@@ -86,7 +85,9 @@
   (enh-ruby-indent-level 2))
 
 (use-package evil
-  :custom (evil-shift-width 2)
+  :custom
+  (evil-shift-width 2)
+  (evil-select-search-module 'evil-search-module 'evil-search)
   :config
   (with-eval-after-load 'evil-maps
     (define-key evil-normal-state-map (kbd "C-h") #'evil-window-left)
@@ -116,9 +117,16 @@
 (use-package evil-tabs)
 (use-package evil-textobj-anyblock)
 (use-package evil-textobj-column)
+(use-package evil-visualstar :config (global-evil-visualstar-mode))
 (use-package find-file-in-project)
 
-(use-package flycheck :delight :custom (flycheck-color-mode-line-face-to-color (quote mode-line-buffer-id)))
+(use-package flycheck
+  :delight
+  :custom
+  (flycheck-color-mode-line-face-to-color (quote mode-line-buffer-id))
+  (flycheck-disabled-checkers (quote (json-jsonlist javascript-jshint)))
+  (flycheck-add-mode 'javascript-eslint 'web-mode))
+
 (use-package gh-md)
 (use-package git-gutter+ :delight :custom (git-gutter+-git-executable "/usr/bin/git"))
 (use-package go-autocomplete :hook go-mode)
@@ -167,7 +175,6 @@
 
 (use-package js2-mode
   :mode (("\\.js\\'" . js2-jsx-mode))
-  :init
   :custom
   (js2-highlight-level 3)
   (js2-mode-assume-strict t)
@@ -190,8 +197,8 @@
   (js2-basic-offset 2)
   (js-switch-indent-offset 2)
   (add-hook 'js2-mode-hook (lambda ()
-                             (subword-mode 1)
-                             (diminish 'subword-mode)
+                             ;;(subword-mode 1)
+                             ;;(diminish 'subword-mode)
                              (js2-imenu-extras-mode 1)))
   (rename-modeline "js2-mode" js2-mode "JS2")
   (rename-modeline "js2-mode" js2-jsx-mode "JSX2")
@@ -256,19 +263,44 @@
   :delight '(:eval (concat " Proj:" (projectile-project-name))))
 
 (use-package pdf-tools :magic ("%PDF" . pdf-view-mode) :config (pdf-tools-install))
-(use-package projectile-rails :delight :hook (ruby-mode enh-ruby-mode))
+(use-package projectile-rails :delight :config (projectile-rails-global-mode t))
 (use-package projectile-ripgrep)
 (use-package ripgrep)
-(use-package rspec-mode :config (rspec-install-snippets) :mode "\\.rb\'")
-(use-package rubocop :delight :custom (rubocop-check-command "rubocop --format emacs") :hook (ruby-mode enh-ruby-mode))
-(use-package ruby-end :delight :custom (ruby-end-insert-newline nil))
-(use-package ruby-extra-highlight :hook (ruby-mode enh-ruby-mode))
-(use-package ruby-refactor :custom (ruby-refactor-add-parens t) :hook (ruby-mode enh-ruby-mode))
-(use-package ruby-mode :config (add-hook 'ruby-mode-hook 'my-ruby-mode-hook) :custom (ruby-deep-arglist nil))
-(use-package ruby-test-mode :delight :hook (ruby-mode enh-ruby-mode))
-(use-package ruby-tools :commands ruby-tools-mode)
+
+(use-package rspec-mode :config (rspec-install-snippets) :after ruby-mode)
+
+(use-package ruby-mode
+  :load-path "/usr/share/emacs/25.3.50/lisp/progmodes"
+  :ensure nil
+  :config
+  (progn
+    (use-package ruby-tools)
+    (use-package rubocop
+      ;:delight
+      :custom (rubocop-check-command "rubocop --format emacs"))
+    (use-package bundler :load-path "~/.emacs.d/lisp")
+    (use-package ruby-block :load-path "~/.emacs.d/lisp" :custom (ruby-block-highlight-toggle t))
+    (use-package ruby-end :custom (ruby-end-insert-newline nil))
+    (use-package ruby-extra-highlight :config (ruby-extra-highlight-mode t))
+    (use-package ruby-refactor :custom (ruby-refactor-add-parens t) :config (add-hook 'ruby-mode-hook 'ruby-refactor-mode-launch))
+
+    (require 'bundler)
+    (require 'rubocop)
+    (require 'ruby-block)
+    (require 'ruby-end)
+    (require 'ruby-extra-highlight)
+    (require 'ruby-test-mode)
+    (require 'ruby-tools)
+
+    (electric-pair-mode t))
+
+  :custom (ruby-deep-arglist nil))
+
+(use-package ruby-test-mode
+  ;:delight
+  :hook ruby-mode)
 (use-package sentence-navigation)
-(use-package subword :delight)
+                                        ;(use-package subword :delight)
 (use-package undo-tree :delight)
 (use-package vdiff)
 
@@ -290,7 +322,13 @@
   :config
   (ac-etags-setup)
   (ac-etags-ac-setup)
-  (flycheck-add-mode 'html-tidy 'web-mode))
+  (flycheck-add-mode 'html-tidy 'web-mode)
+
+  (defadvice web-mode-highlight-part (around tweak-jsx activate)
+    (if (equal web-mode-content-type "jsx")
+        (let ((web-mode-enable-part-face nil))
+          ad-do-it)
+      )))
 
 (use-package yaml-mode)
 (use-package yasnippet :delight yas-minor-mode)
@@ -311,19 +349,6 @@
 (small-font-face)
 
 ;; mode hooks
-(defun my-ruby-mode-hook ()
-  "My Ruby mode hook."
-  (electric-pair-mode)
-  (projectile-rails-mode)
-  (rubocop-mode t)
-  (ruby-end-mode t)
-  (ruby-block-mode t)
-  (ruby-block-highlight-mode t)
-  (ruby-extra-highlight-mode t)
-  (ruby-refactor-mode-launch)
-  (ruby-test-mode t)
-  (ruby-tools-mode t))
-
 (defun my-modes-hook ()
   "My global hook."
 
@@ -339,7 +364,7 @@
   (global-git-gutter+-mode t)
   (global-linum-mode t)
   (global-origami-mode t)
-  (global-subword-mode t)
+                                        ;(global-subword-mode nil)
   (helm-fuzzier-mode t)
   (helm-mode t)
   (menu-bar-mode 0)
