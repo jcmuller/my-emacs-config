@@ -2,6 +2,23 @@
 ;;; Commentary:
 ;;; Code:
 
+;; Gotta have the right fonts
+(if window-system
+    (progn
+      (defun big-font-face ()
+        "Set big font face."
+        (interactive)
+        (message "Changing font to Ubuntu Mono 12")
+        (custom-set-faces '(default ((t (:family "Ubuntu Mono" :foundry "xos4" :slant normal :weight normal :height 120 :width normal))))))
+
+      (defun small-font-face ()
+        "Set small font face."
+        (interactive)
+        (message "Changing font to Terminus 9")
+        (custom-set-faces '(default ((t (:family "Terminus" :foundry "xos4" :slant normal :weight normal :height 90 :width normal))))))
+
+      (small-font-face)))
+
 ;; setup package.el
 (require 'package)
 (setq package-enable-at-startup nil)
@@ -332,20 +349,6 @@
 (use-package yaml-mode)
 (use-package yasnippet :delight yas-minor-mode)
 (use-package yasnippet-snippets)
-
-(defun big-font-face ()
-  "Set big font face."
-  (interactive)
-  (message "Changing font to Ubuntu Mono 12")
-  (custom-set-faces '(default ((t (:family "Ubuntu Mono" :foundry "xos4" :slant normal :weight normal :height 120 :width normal))))))
-
-(defun small-font-face ()
-  "Set small font face."
-  (interactive)
-  (message "Changing font to Terminus 9")
-  (custom-set-faces '(default ((t (:family "Terminus" :foundry "xos4" :slant normal :weight normal :height 90 :width normal))))))
-
-(small-font-face)
 
 ;; mode hooks
 (defun my-modes-hook ()
