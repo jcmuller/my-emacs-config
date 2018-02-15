@@ -19,6 +19,7 @@
  '(fci-rule-color "#d6d6d6")
  '(font-lock-maximum-decoration t)
  '(grep-command "rg -i -M 120 --no-heading --line-number --color never")
+ '(indent-tabs-mode nil)
  '(large-file-warning-threshold (* 20 1024 1024))
  '(save-place t)
  '(truncate-lines t)
