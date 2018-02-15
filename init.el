@@ -107,6 +107,15 @@
   (evil-shift-width 2)
   (evil-select-search-module 'evil-search-module 'evil-search)
   :config
+  (require 'evil-magit)
+  (require 'evil-matchit)
+  (require 'evil-numbers)
+  (require 'evil-rails)
+  (require 'evil-surround)
+  (require 'evil-tabs)
+  (require 'evil-textobj-anyblock)
+  (require 'evil-textobj-column)
+
   (with-eval-after-load 'evil-maps
     (define-key evil-normal-state-map (kbd "C-h") #'evil-window-left)
     (define-key evil-normal-state-map (kbd "C-j") #'evil-window-down)
