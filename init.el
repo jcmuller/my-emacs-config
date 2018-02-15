@@ -311,7 +311,11 @@
 
     (electric-pair-mode t))
 
-  :custom (ruby-deep-arglist nil))
+  :custom
+  (ruby-deep-arglist nil)
+  (ruby-deep-indent-paren nil)
+                                        ;(ruby-use-smie nil)
+  )
 
 (use-package ruby-test-mode
   ;:delight
