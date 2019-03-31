@@ -3,21 +3,51 @@
 ;;; Code:
 
 ;; Gotta have the right fonts
-(if window-system
+                                        ;(if window-system
+                                        ;(progn
+(setq inhibit-startup-screen t)
+
+(defun big-font-face ()
+  "Set big font face."
+  (interactive)
+  (message "Changing font to Ubuntu Mono 12")
+  (custom-set-faces
+   '(default ((t (:family "Ubuntu Mono"
+                          :foundry "xos4"
+                          :slant normal
+                          :weight normal
+                          :height 120
+                          :width normal))))))
+
+(defun small-font-face ()
+  "Set small font face."
+  (interactive)
+  (message "Changing font to Terminus 9")
+  (custom-set-faces
+   '(default ((t (:family "Terminus"
+                          :foundry "xos4"
+                          :slant normal
+                          :weight normal
+                          :height 90
+                          :width normal))))))
+
+(defun toggle-font ()
+  "Cycle font sizes."
+  (interactive)
+  (if (get 'toggle-font 'state)
+      (progn
+        (small-font-face)
+        (put 'toggle-font 'state nil))
     (progn
-      (defun big-font-face ()
-        "Set big font face."
-        (interactive)
-        (message "Changing font to Ubuntu Mono 12")
-        (custom-set-faces '(default ((t (:family "Ubuntu Mono" :foundry "xos4" :slant normal :weight normal :height 120 :width normal))))))
+      (big-font-face)
+      (put 'toggle-font 'state t))))
 
-      (defun small-font-face ()
-        "Set small font face."
-        (interactive)
-        (message "Changing font to Terminus 9")
-        (custom-set-faces '(default ((t (:family "Terminus" :foundry "xos4" :slant normal :weight normal :height 90 :width normal))))))
+(small-font-face)
+;)
 
-      (small-font-face)))
+ ; (defun toggle-font ()
+ ;   "Noop."
+ ;   (message "No graphics mode.")))
 
 ;; setup package.el
 (require 'package)
@@ -30,6 +60,7 @@
   (package-install 'use-package))
 
 (eval-when-compile (require 'use-package))
+
 (setq use-package-compute-statistics t)
 (setq use-package-always-ensure t)
 
@@ -52,13 +83,14 @@
   (setq ac-sources '(ac-source-yasnippet
                      ac-source-abbrev
                      ac-source-words-in-same-mode-buffers))
-  (ac-config-default))
+  (ac-config-default)
+  (ac-etags-setup)
+  (ac-etags-ac-setup)
+  (yas-global-mode 1))
 
 (use-package ac-etags
-  :ensure t
-  :config
-  (ac-etags-setup)
-  (ac-etags-ac-setup))
+  :defer
+  :ensure t)
 
 (use-package autorevert :delight auto-revert-mode)
 (use-package browse-at-remote :bind (("C-c g g" . #'browse-at-remote)))
@@ -78,12 +110,20 @@
         (put 'toggle-theme 'state t))))
   (load-theme 'sanityinc-tomorrow-day))
 
+(use-package ctags-update
+  :custom
+  (ctags-update-prompt-create-tags nil)
+                                        ;:config
+                                        ;(ctags-global-auto-update-mode)
+  )
+
 (use-package delight)
-(use-package dockerfile-mode)
+(use-package dockerfile-mode :mode "\\'Dockerfile\\'")
 (use-package editorconfig-custom-majormode)
 (use-package editorconfig)
 
 (use-package enh-ruby-mode
+  :defer
   :config
   (add-hook 'enh-ruby-mode-hook 'my-enh-ruby-mode-hook)
   (auto-complete-mode)
@@ -103,10 +143,22 @@
   (enh-ruby-indent-level 2))
 
 (use-package evil
+  ;:init (setq evil-want-integration nil)
   :custom
-  (evil-shift-width 2)
   (evil-select-search-module 'evil-search-module 'evil-search)
+  (evil-shift-width 2)
   :config
+  (use-package evil-magit)
+  (use-package evil-matchit)
+  (use-package evil-numbers)
+  (use-package evil-rails)
+  (use-package evil-surround)
+  (use-package evil-tabs)
+  (use-package evil-textobj-anyblock)
+  (use-package evil-textobj-column)
+  (use-package evil-visualstar :config (global-evil-visualstar-mode))
+  ;(use-package evil-collection :config (evil-collection-init))
+
   (require 'evil-magit)
   (require 'evil-matchit)
   (require 'evil-numbers)
@@ -136,15 +188,6 @@
   (evil-ex-define-cmd "ls" #'helm-mini)
   (evil-ex-define-cmd "ts" 'xref-find-definitions-with-prompt))
 
-(use-package evil-magit)
-(use-package evil-matchit)
-(use-package evil-numbers)
-(use-package evil-rails)
-(use-package evil-surround)
-(use-package evil-tabs)
-(use-package evil-textobj-anyblock)
-(use-package evil-textobj-column)
-(use-package evil-visualstar :config (global-evil-visualstar-mode))
 (use-package find-file-in-project)
 
 (use-package flycheck
@@ -154,20 +197,30 @@
   (flycheck-disabled-checkers (quote (json-jsonlist javascript-jshint)))
   (flycheck-add-mode 'javascript-eslint 'web-mode))
 
-(use-package gh-md)
 (use-package git-gutter+ :delight :custom (git-gutter+-git-executable "/usr/bin/git"))
-(use-package go-autocomplete :hook go-mode)
 
 (use-package go-mode
   :bind (("M-." . #'godef-jump)
-         ("M-*" . #'pop-tag-mark))
+         ("M-*" . #'pop-tag-mark)
+         ("C-]" . #'godef-jump))
+  :mode "\\.go\\'"
   :config
   (defun my-go-mode-hook ()
     (add-hook 'before-save-hook 'gofmt-before-save))
 
   (add-hook 'go-mode-hook 'my-go-mode-hook)
   (setenv "gopath" "/home/jcmuller/go")
-  (with-eval-after-load 'go-mode (require 'go-autocomplete)))
+  (use-package go-autocomplete)
+  (use-package go-rename)
+  (use-package go-guru)
+
+  (require 'go-autocomplete)
+  (require 'auto-complete-config)
+  (ac-config-default)
+
+  :custom
+  (gofmt-command "goimports"))
+  ;(gofmt-command "/home/jcmuller/bin/gofmtsimports.sh"))
 
 (use-package goto-last-change)
 
@@ -188,8 +241,7 @@
   (helm-ls-git-fuzzy-match t)
   (helm-mode-fuzzy-match t))
 
-(use-package helm-bundle-show)
-(use-package helm-cmd-t)
+;(use-package helm-cmd-t)
 (use-package helm-flx)
 (use-package helm-flycheck)
 (use-package helm-fuzzier)
@@ -198,53 +250,74 @@
 (use-package helm-projectile :config (helm-projectile-on))
 
 (use-package json-mode
+  :mode "\\.json\\'"
   :init (setq js-indent-level 2))
 
-(use-package js2-mode
-  :mode (("\\.js\\'" . js2-jsx-mode))
-  :custom
-  (js2-allow-rhino-new-expr-initializer nil)
-  (js2-basic-offset 2)
-  (js2-highlight-level 3)
-  (js2-include-node-externs t)
-  (js2-missing-semi-one-line-override t)
-  (js2-mode-assume-strict t)
-  (js2-strict-trailing-comma-warning nil)
-  (js2-warn-about-unused-function-arguments t)
-  (js-switch-indent-offset 2)
-  (js2-global-externs '(
-                        "afterAll"
-                        "afterEach"
-                        "beforeAll"
-                        "beforeEach"
-                        "describe"
-                        "expect"
-                        "it"
-                        "jest"
-                        "require"
-                        "test"))
-  (add-hook 'js2-mode-hook (lambda ()
-                             ;;(subword-mode 1)
-                             ;;(diminish 'subword-mode)
-                             (js2-imenu-extras-mode 1)))
-  (rename-modeline "js2-mode" js2-mode "JS2")
-  (rename-modeline "js2-mode" js2-jsx-mode "JSX2")
-  :config
-  (electric-pair-mode)
-  (use-package tern
-    :diminish tern-mode
-    :init
-    (add-hook 'js2-mode-hook 'tern-mode))
-  (use-package js-doc)
-  (use-package js2-refactor
-    :diminish js2-refactor-mode
-    :init
-    (add-hook 'js2-mode-hook #'js2-refactor-mode)
-    :config
-    (js2r-add-keybindings-with-prefix "C-c r")))
+; (use-package js2-mode
+;   :mode (("\\.js\\'" . js2-jsx-mode))
+;   :custom
+;   (js2-allow-rhino-new-expr-initializer nil)
+;   (js2-basic-offset 2)
+;   (js2-highlight-level 3)
+;   (js2-include-node-externs t)
+;   (js2-missing-semi-one-line-override t)
+;   (js2-mode-assume-strict t)
+;   (js2-strict-trailing-comma-warning nil)
+;   (js2-warn-about-unused-function-arguments t)
+;   (js-switch-indent-offset 2)
+;   (js2-global-externs '(
+;                         "afterAll"
+;                         "afterEach"
+;                         "beforeAll"
+;                         "beforeEach"
+;                         "describe"
+;                         "expect"
+;                         "it"
+;                         "jest"
+;                         "require"
+;                         "test"))
+;   (add-hook 'js2-mode-hook (lambda ()
+;                              ;;(subword-mode 1)
+;                              ;;(diminish 'subword-mode)
+;                              (js2-imenu-extras-mode 1)))
+;   (rename-modeline "js2-mode" js2-mode "JS2")
+;   (rename-modeline "js2-mode" js2-jsx-mode "JSX2")
+;   :config
+;   (electric-pair-mode)
+;   (use-package tern
+;     :diminish tern-mode
+;     :init
+;     (add-hook 'js2-mode-hook 'tern-mode))
+;   (use-package js-doc)
+;   (use-package js2-refactor
+;     :diminish js2-refactor-mode
+;     :init
+;     (add-hook 'js2-mode-hook #'js2-refactor-mode)
+;     :config
+;     (js2r-add-keybindings-with-prefix "C-c r")))
 
-(use-package jsx-mode
-  :init (setq jsx-indent-level 2))
+(use-package flow-mode
+  :load-path "~/.emacs.d/lisp"
+  :defer
+  :config
+  (use-package flycheck-flow)
+  (flycheck-mode t)
+  (flycheck-add-next-checker 'javascript-flow 'javascript-flow-coverage 'javascript-eslint))
+
+(use-package rjsx-mode
+  :mode ".*\\/webpack\\/.*\\.js\\'"
+  :config
+  (use-package flycheck-flow)
+
+  (setq exec-path (append exec-path '("~/bin")))
+  (flycheck-mode t)
+  (flycheck-add-next-checker 'javascript-flow 'javascript-flow-coverage 'javascript-eslint))
+
+(use-package nvm :config (require 'nvm))
+
+(use-package flow-jsx-mode :ensure nil :load-path "~/.emacs.d/lisp")
+
+;(use-package jsx-mode :init (setq jsx-indent-level 2))
 
 (use-package magit
   :bind ([f9] . #'magit-status)
@@ -253,8 +326,17 @@
   (magit-git-executable "/usr/bin/git"))
 
 (use-package magit-popup)
-(use-package markdown-mode)
-(use-package markdown-mode+)
+(use-package markdown-mode
+  :mode "\\.md\\'"
+
+  :config
+  ;(use-package gh-md)
+  (use-package markdown-toc)
+  (use-package markdown-mode+)
+  (use-package livedown
+    :load-path "~/.emacs.d/lisp/emacs-livedown"
+    :custom
+    (livedown-browser "picky")))
 
 (use-package neotree
   :bind ([f8] . #'neotree-project-dir)
@@ -277,48 +359,58 @@
                         (let ((fit-window-to-buffer-horizontally t))
                           (fit-window-to-buffer))))))
 
-(use-package org-alert)
-(use-package org-evil)
-(use-package org :custom (org-log-done t))
+(use-package org
+  :mode "\\/org\\/"
+  :custom
+  (org-log-done t)
+  :config
+  ;; WHen I start using org-mode I should move org-alert to the top
+  (use-package org-alert)
+  (use-package org-evil))
+
 (use-package origami)
 
 (use-package projectile
   :custom
   (projectile-switch-project-action (quote my-projectile-switch-project-action))
-  (projectile-enable-caching t)
+  ;(projectile-enable-caching t)
   :delight '(:eval (concat " Proj:" (projectile-project-name))))
 
 (use-package pdf-tools :magic ("%PDF" . pdf-view-mode) :config (pdf-tools-install))
-(use-package projectile-rails :delight :config (projectile-rails-global-mode t))
+(use-package projectile-rails :mode "\\.rb\\'" :delight :config (projectile-rails-global-mode t))
 (use-package projectile-ripgrep)
 (use-package ripgrep)
 
-(use-package rspec-mode :config (rspec-install-snippets) :after ruby-mode)
+(use-package rspec-mode
+  :mode "_spec\\.rb\\'"
+  :config (rspec-install-snippets))
 
 (use-package ruby-mode
-  :load-path "/usr/share/emacs/25.3.50/lisp/progmodes"
   :ensure nil
+  :no-require t
+  :mode "\\.rb\\'"
   :config
-  (progn
-    (use-package ruby-tools)
-    (use-package rubocop
-      ;:delight
-      :custom (rubocop-check-command "rubocop --format emacs"))
-    (use-package bundler :load-path "~/.emacs.d/lisp")
-    (use-package ruby-block :load-path "~/.emacs.d/lisp" :custom (ruby-block-highlight-toggle t))
-    (use-package ruby-end :custom (ruby-end-insert-newline nil))
-    (use-package ruby-extra-highlight :config (ruby-extra-highlight-mode t))
-    (use-package ruby-refactor :custom (ruby-refactor-add-parens t) :config (add-hook 'ruby-mode-hook 'ruby-refactor-mode-launch))
+  (use-package ruby-tools)
+  (use-package rubocop :custom (rubocop-check-command "rubocop --format emacs"))
+  (use-package bundler :load-path "~/.emacs.d/lisp")
+  (use-package helm-bundle-show)
+  (use-package ruby-block :load-path "~/.emacs.d/lisp" :custom (ruby-block-highlight-toggle t))
+  (use-package ruby-end :custom (ruby-end-insert-newline nil))
+  (use-package ruby-extra-highlight :config (ruby-extra-highlight-mode t))
+  (use-package ruby-refactor :custom (ruby-refactor-add-parens t) :defer)
+  (use-package ruby-test-mode)
 
-    (require 'bundler)
-    (require 'rubocop)
-    (require 'ruby-block)
-    (require 'ruby-end)
-    (require 'ruby-extra-highlight)
-    (require 'ruby-test-mode)
-    (require 'ruby-tools)
+  (require 'bundler)
+  (require 'rubocop)
+  (require 'ruby-block)
+  (require 'ruby-end)
+  (require 'ruby-extra-highlight)
+  (require 'ruby-test-mode)
+  (require 'ruby-tools)
 
-    (electric-pair-mode t))
+  (auto-complete-mode)
+  (electric-pair-mode t)
+  (ruby-refactor-mode-launch)
 
   :custom
   (ruby-deep-arglist nil)
@@ -326,9 +418,6 @@
                                         ;(ruby-use-smie nil)
   )
 
-(use-package ruby-test-mode
-  ;:delight
-  :hook ruby-mode)
 (use-package sentence-navigation)
                                         ;(use-package subword :delight)
 (use-package undo-tree :delight)
@@ -360,8 +449,11 @@
       )))
 
 (use-package yaml-mode)
-(use-package yasnippet :delight yas-minor-mode)
-(use-package yasnippet-snippets)
+(use-package yasnippet
+  :delight yas-minor-mode
+  :defer
+  :config
+  (use-package yasnippet-snippets))
 
 ;; mode hooks
 (defun my-modes-hook ()
@@ -370,7 +462,7 @@
   (column-number-mode t)
   (dynamic-completion-mode t)
   (evil-mode t)
-  (global-auto-complete-mode t)
+  ;;(global-auto-complete-mode t)
   (global-evil-matchit-mode t)
   (global-evil-surround-mode t)
   (global-evil-tabs-mode t)
@@ -387,8 +479,7 @@
   (savehist-mode t)
   (scroll-bar-mode 0)
   (show-paren-mode t)
-  (tool-bar-mode 0)
-  (yas-global-mode 1))
+  (tool-bar-mode 0))
 
 ;; default to utf-8 everywhere
 (set-terminal-coding-system 'utf-8)
@@ -418,21 +509,6 @@
 (add-hook 'after-init-hook #'my-modes-hook)
 (add-hook 'before-save-hook #'my-whitespace-cleanup)
 
-(add-to-list 'auto-mode-alist
-             '("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . ruby-mode))
-                                        ;'("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode))
-
-(defun toggle-font ()
-  "Cycle font sizes."
-  (interactive)
-  (if (get 'toggle-font 'state)
-      (progn
-        (small-font-face)
-        (put 'toggle-font 'state nil))
-    (progn
-      (big-font-face)
-      (put 'toggle-font 'state t))))
-
 (defun xref-find-definitions-with-prompt (identifier)
   "Search for the definition of IDENTIFIER."
   (interactive (list (xref--read-identifier "Find definitions of: ")))
@@ -452,6 +528,9 @@
    (t string)))
 
 (advice-add 'vc-git-mode-line-string :filter-return 'my-shorten-vc-mode-line)
+
+(add-to-list 'auto-mode-alist
+             '("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . ruby-mode))
 
  ;;;  Jonas.Jarnestrom<at>ki.ericsson.se A smarter
   ;;;  find-tag that automagically reruns etags when it cant find a
